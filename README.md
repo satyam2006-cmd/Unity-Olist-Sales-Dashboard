@@ -17,6 +17,7 @@ To rebuild the saved scene from the prepared dataset, use **Tools → QuakeScope
 - Revenue by month, units by category, revenue by product category, and revenue by city.
 - Clickable KPIs and chart bars show the selected value in the scene.
 - KPI values, monthly line points, category donut segments, product bars, city columns, and numeric axis scales are recalculated from the live CSV.
+- Chart colors use a ranked green palette: higher values use darker greens and lower values fade to lighter greens.
 
 Revenue is based on item prices and excludes freight. The Olist tables do not contain profit, so the dashboard does not report profit.
 

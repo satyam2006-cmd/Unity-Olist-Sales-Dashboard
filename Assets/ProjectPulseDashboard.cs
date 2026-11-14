@@ -16,15 +16,16 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
     static readonly Color White = Hex("#FFFFFF");
     static readonly Color Canvas = Hex("#F6F8F6");
     static readonly Color Grid = Hex("#DCE5DF");
-    static readonly Color Amber = Hex("#E5AD45");
-    static readonly Color Blue = Hex("#1688EF");
-    static readonly Color Navy = Hex("#192E9B");
-    static readonly Color Rose = Hex("#D96F70");
+    static readonly Color GreenMid = Hex("#348B67");
+    static readonly Color GreenSoft = Hex("#74B795");
+    static readonly Color GreenPale = Hex("#A7D6BA");
 
     Transform board;
     Camera viewCamera;
     TextMesh insightText;
     readonly Dictionary<Collider, string> clickDetails = new Dictionary<Collider, string>();
+    readonly HashSet<Material> generatedMaterials = new HashSet<Material>();
+    readonly HashSet<Mesh> generatedMeshes = new HashSet<Mesh>();
     SalesSnapshot sales;
     string liveDataPath;
     string lastLoadedDataStamp;
@@ -42,6 +43,7 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
         BuildEnvironment();
         BuildDashboard();
         SetDataPlaceholdersInEditor();
+        ApplyGreenThemeInEditor();
     }
 
     public void SetDataPlaceholdersInEditor()
@@ -50,6 +52,46 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
         board = transform.Find("Retail Sales · 3D Dashboard");
         FindInsightText();
         SetDataPlaceholders();
+    }
+
+    public void ApplyGreenThemeInEditor()
+    {
+        if (Application.isPlaying) return;
+        if (sales == null) sales = LoadSalesSnapshot();
+        board = transform.Find("Retail Sales · 3D Dashboard");
+        if (board == null) return;
+        var shades = new[] { Green, GreenMid, GreenSoft, GreenPale };
+        ApplyValuePalette(board.Find("04 · Bar Chart · Revenue by Product"), "Product Revenue Bar · ", shades,
+            renderer => LookupValue(sales.SubcategorySales, renderer.name, "Product Revenue Bar · "));
+        ApplyValuePalette(board.Find("05 · Column Chart · Revenue by City"), "3D City Revenue Bar · ", shades,
+            renderer => LookupValue(sales.CitySales, renderer.name, "3D City Revenue Bar · "));
+
+        var leadingCategories = sales.CategoryUnits.OrderByDescending(pair => pair.Value).Take(3).ToArray();
+        int otherUnits = sales.TotalUnits - leadingCategories.Sum(pair => pair.Value);
+        var donutValues = leadingCategories.ToDictionary(pair => pair.Key, pair => (double)pair.Value);
+        if (otherUnits > 0) donutValues["Other categories"] = otherUnits;
+        ApplyValuePalette(board.Find("03 · Donut Chart · Units by Category"), "3D Donut Segment · ", shades,
+            renderer => LookupValue(donutValues, renderer.name, "3D Donut Segment · "));
+    }
+
+    static double LookupValue<T>(IDictionary<string, T> values, string objectName, string prefix) where T : IConvertible
+    {
+        string key = objectName.Substring(prefix.Length);
+        return values.TryGetValue(key, out T value) ? Convert.ToDouble(value, CultureInfo.InvariantCulture) : 0;
+    }
+
+    static void ApplyValuePalette(Transform group, string objectPrefix, Color[] palette, Func<Renderer, double> valueSelector)
+    {
+        if (group == null) return;
+        var renderers = group.GetComponentsInChildren<Renderer>(true)
+            .Where(renderer => renderer.name.StartsWith(objectPrefix, StringComparison.Ordinal))
+            .OrderByDescending(valueSelector).ToArray();
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            var material = renderers[i].sharedMaterial;
+            int shadeIndex = renderers.Length <= 1 ? 0 : Mathf.RoundToInt(i * (palette.Length - 1f) / (renderers.Length - 1f));
+            if (material != null) material.color = palette[shadeIndex];
+        }
     }
 
     void Start()
@@ -88,7 +130,11 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
     void ClearChildren()
     {
         for (int i = transform.childCount - 1; i >= 0; i--)
-            DestroyImmediate(transform.GetChild(i).gameObject);
+        {
+            var child = transform.GetChild(i).gameObject;
+            DestroyGeneratedResources(child);
+            DestroyImmediate(child);
+        }
         clickDetails.Clear(); board = null; viewCamera = null;
     }
 
@@ -173,18 +219,7 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
         for (int i = group.childCount - 1; i >= 0; i--)
         {
             var child = group.GetChild(i).gameObject;
-            foreach (Renderer renderer in child.GetComponentsInChildren<Renderer>(true))
-                if (renderer.sharedMaterial != null)
-                {
-                    if (Application.isPlaying) Destroy(renderer.sharedMaterial);
-                    else DestroyImmediate(renderer.sharedMaterial);
-                }
-            foreach (MeshFilter filter in child.GetComponentsInChildren<MeshFilter>(true))
-                if (filter.sharedMesh != null)
-                {
-                    if (Application.isPlaying) Destroy(filter.sharedMesh);
-                    else DestroyImmediate(filter.sharedMesh);
-                }
+            DestroyGeneratedResources(child);
             if (Application.isPlaying) Destroy(child);
             else DestroyImmediate(child);
         }
@@ -192,6 +227,24 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
         board = group;
         try { build(); }
         finally { board = previousBoard; }
+    }
+
+    void DestroyGeneratedResources(GameObject owner)
+    {
+        foreach (Renderer renderer in owner.GetComponentsInChildren<Renderer>(true))
+        {
+            Material material = renderer.sharedMaterial;
+            if (material == null || !generatedMaterials.Remove(material)) continue;
+            if (Application.isPlaying) Destroy(material);
+            else DestroyImmediate(material);
+        }
+        foreach (MeshFilter filter in owner.GetComponentsInChildren<MeshFilter>(true))
+        {
+            Mesh mesh = filter.sharedMesh;
+            if (mesh == null || !generatedMeshes.Remove(mesh)) continue;
+            if (Application.isPlaying) Destroy(mesh);
+            else DestroyImmediate(mesh);
+        }
     }
 
     void FindInsightText()
@@ -461,26 +514,29 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
         Panel("Chart · Units per Category · 3D", new Vector3(3.12f, .05f, .12f), 2.88f, 1.91f, .12f, White, .10f);
         Text("UNITS PER CATEGORY", new Vector3(3.12f, .79f, .225f), .073f, Ink, TextAnchor.MiddleCenter, FontStyle.Bold);
         var leading = sales.CategoryUnits.Where(x => x.Value > 0).OrderByDescending(x => x.Value).Take(3).ToArray();
-        var categories = leading.Select(x => x.Key).ToList();
+        var categories = leading.Select(x => new KeyValuePair<string, int>(x.Key, x.Value)).ToList();
         int otherUnits = sales.TotalUnits - leading.Sum(x => x.Value);
-        if (otherUnits > 0) categories.Add("Other categories");
-        Color[] colors = { Green, Bright, Amber, Blue };
+        if (otherUnits > 0) categories.Add(new KeyValuePair<string, int>("Other categories", otherUnits));
+        categories = categories.OrderByDescending(category => category.Value).ToList();
+        Color[] colors = { Green, GreenMid, GreenSoft, GreenPale };
         int total = Math.Max(1, sales.TotalUnits);
         float angle = -90f;
         for (int i = 0; i < categories.Count; i++)
         {
-            int units = categories[i] == "Other categories" ? otherUnits : sales.CategoryUnits[categories[i]];
+            string categoryName = categories[i].Key;
+            int units = categories[i].Value;
             float share = (float)units / total;
             float end = angle + share * 360f;
-            Donut(new Vector3(2.46f, .01f, .36f), .60f, .37f, .16f, angle, end, colors[i], categories[i]);
+            Donut(new Vector3(2.46f, .01f, .36f), .60f, .37f, .16f, angle, end, colors[i], categoryName);
             angle = end + 1.4f;
         }
         Text(CountShort(sales.TotalUnits), new Vector3(2.46f, .06f, .47f), .085f, Ink, TextAnchor.MiddleCenter, FontStyle.Bold);
         Text("UNITS", new Vector3(2.46f, -.11f, .47f), .039f, Muted, TextAnchor.MiddleCenter);
         for (int i = 0; i < categories.Count; i++)
         {
-            int units = categories[i] == "Other categories" ? otherUnits : sales.CategoryUnits[categories[i]];
-            LegendDot(3.30f, .40f - i * .24f, colors[i], ShortCategory(categories[i]) + " · " + CountShort(units));
+            string categoryName = categories[i].Key;
+            int units = categories[i].Value;
+            LegendDot(3.30f, .40f - i * .24f, colors[i], ShortCategory(categoryName) + " · " + CountShort(units));
         }
         ChartFrame(3.12f, .05f, 2.88f, 1.91f);
     }
@@ -493,7 +549,7 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
         var products = sales.SubcategorySales.OrderByDescending(x => x.Value).Take(8).ToArray();
         float max = (float)products.Select(product => product.Value).DefaultIfEmpty(1).Max();
         if (max <= 0) max = 1;
-        Color[] palette = { Green, Hex("#277C5A"), Amber, Bright, Hex("#3D956D"), Hex("#91CDAA"), Blue, Hex("#527F65"), Hex("#D9B800") };
+        Color[] palette = { Green, Green, GreenMid, GreenMid, GreenSoft, GreenSoft, GreenPale, GreenPale };
         for (int i = 0; i < products.Length; i++)
         {
             float y = -1.35f - i * .133f;
@@ -514,6 +570,7 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
         var cities = sales.CitySales.OrderByDescending(x => x.Value).Take(7).ToArray();
         float x0 = 1.38f, x1 = 4.28f, baseY = -2.15f, topY = -1.38f;
         float max = NiceAxisMaximum((float)cities.Select(city => city.Value).DefaultIfEmpty(0).Max());
+        Color[] cityPalette = { Green, GreenMid, GreenMid, GreenSoft, GreenSoft, GreenPale, GreenPale };
         for (int tick = 0; tick <= 2; tick++)
         {
             float y = Mathf.Lerp(baseY, topY, tick / 2f);
@@ -528,7 +585,7 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
         {
             float x = x0 + step * (i + .5f);
             float h = (topY - baseY) * Mathf.Clamp01((float)cities[i].Value / max);
-            Color barColor = i == 0 ? Green : (i < 3 ? Bright : Hex("#8DC9A7"));
+            Color barColor = cityPalette[i % cityPalette.Length];
             Box("3D City Revenue Bar · " + cities[i].Key, new Vector3(x, baseY + h * .5f, .32f), step * .58f, h, .18f, barColor, true,
                 cities[i].Key + " sales: " + Money(cities[i].Value) + ".");
             Text(ShortCity(cities[i].Key), new Vector3(x, baseY - .12f, .26f), .039f, Muted, TextAnchor.MiddleCenter);
@@ -720,6 +777,7 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
             triangles.AddRange(new[] { n, n + 1, n + 2, n, n + 2, n + 3 });
         }
         var mesh = new Mesh { name = name };
+        generatedMeshes.Add(mesh);
         mesh.SetVertices(vertices); mesh.SetTriangles(triangles, 0); mesh.RecalculateNormals(); mesh.RecalculateBounds();
         var go = new GameObject(name, typeof(MeshFilter), typeof(MeshRenderer)); go.transform.SetParent(board, false);
         go.GetComponent<MeshFilter>().sharedMesh = mesh; go.GetComponent<MeshRenderer>().sharedMaterial = Material(color);
@@ -799,7 +857,7 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
             triangles.AddRange(new[] { a, b, a + 1, a + 1, b, b + 1, a + 2, a + 3, b + 2, a + 3, b + 3, b + 2,
                 a, a + 2, b, b, a + 2, b + 2, a + 1, b + 1, a + 3, b + 1, b + 3, a + 3 });
         }
-        var mesh = new Mesh { name = "3D Portfolio Progress Arc" }; mesh.SetVertices(vertices); mesh.SetTriangles(triangles, 0);
+        var mesh = new Mesh { name = "3D Portfolio Progress Arc" }; generatedMeshes.Add(mesh); mesh.SetVertices(vertices); mesh.SetTriangles(triangles, 0);
         mesh.RecalculateNormals(); mesh.RecalculateBounds();
         var go = new GameObject("3D Donut Segment · " + detail, typeof(MeshFilter), typeof(MeshRenderer));
         go.transform.SetParent(board, false); go.transform.localPosition = LayoutPosition(center);
@@ -819,14 +877,15 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
         for(int i=0;i<count;i++) vertices.Add(new Vector3(ring[i].x,ring[i].y,-d/2));
         var tris=new List<int>();
         for(int i=0;i<count;i++) { int j=(i+1)%count; tris.AddRange(new[]{0,i+1,j+1,back,backRing+j,backRing+i,i+1,backRing+i,j+1,j+1,backRing+i,backRing+j}); }
-        var mesh=new Mesh{name="Rounded 3D Dashboard Panel"}; mesh.SetVertices(vertices); mesh.SetTriangles(tris,0); mesh.RecalculateNormals(); mesh.RecalculateBounds(); return mesh;
+        var mesh=new Mesh{name="Rounded 3D Dashboard Panel"}; generatedMeshes.Add(mesh); mesh.SetVertices(vertices); mesh.SetTriangles(tris,0); mesh.RecalculateNormals(); mesh.RecalculateBounds(); return mesh;
     }
 
     static Vector3 LayoutPosition(Vector3 p) => new Vector3(-p.x, p.y, p.z);
-    static Material Material(Color color)
+    Material Material(Color color)
     {
         var shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
         var m = new Material(shader) { color = color };
+        generatedMaterials.Add(m);
         if (m.HasProperty("_Smoothness")) m.SetFloat("_Smoothness", .04f);
         return m;
     }
