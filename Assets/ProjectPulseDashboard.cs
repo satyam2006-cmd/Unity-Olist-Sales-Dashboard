@@ -117,6 +117,74 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
         BuildTeamPanel();
         BuildProgressPanel();
         BuildInsightsPanel();
+        OrganizeSceneHierarchy();
+    }
+
+    void OrganizeSceneHierarchy()
+    {
+        var support = transform.Find("Scene Support");
+        if (support == null)
+        {
+            var supportObject = new GameObject("Scene Support");
+            support = supportObject.transform;
+            support.SetParent(transform, false);
+        }
+        foreach (Transform child in transform.Cast<Transform>().ToArray())
+            if (child.name == "Dashboard Camera" || child.name == "Dashboard Key Light" || child.name == "Dashboard Fill Light")
+                child.SetParent(support, true);
+
+        string[] names = {
+            "01 · KPI Cards",
+            "02 · Line Chart · Revenue per Month",
+            "03 · Donut Chart · Units by Category",
+            "04 · Bar Chart · Revenue by Product",
+            "05 · Column Chart · Revenue by City",
+            "06 · Dashboard Frame & Insights"
+        };
+        var groups = new Dictionary<string, Transform>();
+        foreach (string name in names)
+        {
+            var group = board.Find(name);
+            if (group == null)
+            {
+                var groupObject = new GameObject(name);
+                group = groupObject.transform;
+                group.SetParent(board, false);
+            }
+            groups[name] = group;
+        }
+
+        var existingObjects = board.Cast<Transform>().Where(child => !groups.Values.Contains(child)).ToArray();
+        foreach (Transform item in existingObjects)
+        {
+            string name = item.name;
+            Vector3 position = item.position;
+            string target;
+            if (name.StartsWith("KPI ·") || name.StartsWith("Metric Divider") || (position.y > 1.25f && position.y < 1.90f))
+                target = names[0];
+            else if (name == "Dashboard Backing · 3D" || name.Contains("Navigation Rail") || name.Contains("Header Rule") ||
+                     name.Contains("SALESCOPE") || name.Contains("BRAZILIAN E-COMMERCE") || position.y < -2.40f)
+                target = names[5];
+            else if (name.Contains("Monthly Revenue") || name.Contains("Revenue per Month") ||
+                     name.Contains("Revenue Gridline ·") || name.Contains("Revenue Axis ·"))
+                target = names[1];
+            else if (name.Contains("Donut") || name.Contains("Units per Category") || name.Contains("Progress Legend Dot"))
+                target = names[2];
+            else if (name.Contains("Product Revenue") || name.Contains("Revenue by Product"))
+                target = names[3];
+            else if (name.Contains("City Revenue") || name.Contains("Revenue by City") || name.Contains("3D City Revenue Bar"))
+                target = names[4];
+            else if (name.Contains("Chart Frame"))
+                target = position.y > -.85f ? (position.x > 1.55f ? names[2] : names[1]) : (position.x > 1f ? names[4] : names[3]);
+            else if (position.y >= -.90f && position.y < 1.25f)
+                target = position.x > 1.55f ? names[2] : names[1];
+            else if (position.y < -.90f && position.y >= -2.40f)
+                target = position.x > 1f ? names[4] : names[3];
+            else
+                target = names[5];
+
+            item.SetParent(groups[target], true);
+        }
     }
 
     void BuildSalesMetrics()

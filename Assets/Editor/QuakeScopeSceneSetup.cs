@@ -22,9 +22,9 @@ static class QuakeScopeSceneSetup
         if (scene.path != ScenePath)
             scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
 
-        var root = scene.GetRootGameObjects().FirstOrDefault(go => go.name == "Sales Dashboard" || go.name == "QuakeScope Dashboard");
-        if (root == null) root = new GameObject("Sales Dashboard");
-        root.name = "Sales Dashboard";
+        var root = scene.GetRootGameObjects().FirstOrDefault(go => go.name == "Salescope" || go.name == "Sales Dashboard" || go.name == "QuakeScope Dashboard");
+        if (root == null) root = new GameObject("Salescope");
+        root.name = "Salescope";
         root.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
         root.transform.localScale = Vector3.one;
         var oldDashboard = root.GetComponent<QuakeScopeDashboard>();
