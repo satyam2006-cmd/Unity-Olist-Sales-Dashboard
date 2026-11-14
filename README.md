@@ -1,5 +1,8 @@
 # Salescope
 
+[![Unity 6.6.7f1](https://img.shields.io/badge/Unity-6.6.7f1-000000?logo=unity&logoColor=white)](https://unity.com/releases/editor/whats-new/6000.6.7f1)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
 Salescope is an interactive 3D sales dashboard built in Unity. It turns the Olist Brazilian e-commerce dataset into live KPIs and 3D charts.
 The dashboard includes a monthly revenue line chart, category donut, product revenue bars, city columns, and a ranked green palette. KPI values, chart shapes, and axes update from the CSV while the scene is running.
 
@@ -28,4 +31,8 @@ Open the project in **Unity 6.6.7f1**, open `Assets/Scenes/SalescopeDashboard.un
   </table>
 </div>
 
-Data: [Brazilian E-Commerce Public Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce), 2016–2018. Revenue sums item prices and excludes freight; the dataset has no profit field. Source license: CC BY-NC-SA 4.0. Details: [Datasets/OlistSource.md](Datasets/OlistSource.md).
+Data: [Brazilian E-Commerce Public Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce), 2016–2018. Revenue sums item prices and excludes freight; the dataset has no profit field.
+
+## License
+
+Salescope's original project code is MIT licensed; see [LICENSE](LICENSE). The Olist dataset is separately licensed **CC BY-NC-SA 4.0**. See [Datasets/OlistSource.md](Datasets/OlistSource.md) for dataset attribution and terms.
