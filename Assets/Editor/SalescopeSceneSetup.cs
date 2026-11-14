@@ -6,29 +6,27 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 [InitializeOnLoad]
-static class QuakeScopeSceneSetup
+static class SalescopeSceneSetup
 {
-    const string ScenePath = "Assets/Scenes/QuakeScopeDashboard.unity";
+    const string ScenePath = "Assets/Scenes/SalescopeDashboard.unity";
 
-    static QuakeScopeSceneSetup()
+    static SalescopeSceneSetup()
     {
         EditorApplication.delayCall += EnsureScene;
     }
 
-    [MenuItem("Tools/QuakeScope/Build Editable 3D Dashboard")]
+    [MenuItem("Tools/Salescope/Build Editable 3D Dashboard")]
     static void BuildEditableDashboard()
     {
         var scene = SceneManager.GetActiveScene();
         if (scene.path != ScenePath)
             scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
 
-        var root = scene.GetRootGameObjects().FirstOrDefault(go => go.name == "Salescope" || go.name == "Sales Dashboard" || go.name == "QuakeScope Dashboard");
+        var root = scene.GetRootGameObjects().FirstOrDefault(go => go.name == "Salescope" || go.name == "Sales Dashboard");
         if (root == null) root = new GameObject("Salescope");
         root.name = "Salescope";
         root.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
         root.transform.localScale = Vector3.one;
-        var oldDashboard = root.GetComponent<QuakeScopeDashboard>();
-        if (oldDashboard != null) Object.DestroyImmediate(oldDashboard);
         var dashboard = root.GetComponent<ProjectPulseDashboard>() ?? root.AddComponent<ProjectPulseDashboard>();
         dashboard.BuildInEditor();
         EditorSceneManager.MarkSceneDirty(scene);
@@ -42,14 +40,15 @@ static class QuakeScopeSceneSetup
         if (EditorApplication.isPlayingOrWillChangePlaymode || System.IO.File.Exists(ScenePath)) return;
 
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-        var root = new GameObject("QuakeScope Dashboard");
-        root.AddComponent<QuakeScopeDashboard>();
+        var root = new GameObject("Salescope");
+        var dashboard = root.AddComponent<ProjectPulseDashboard>();
+        dashboard.BuildInEditor();
         EditorSceneManager.SaveScene(scene, ScenePath);
 
         var scenes = EditorBuildSettings.scenes.ToList();
         scenes.Add(new EditorBuildSettingsScene(ScenePath, true));
         EditorBuildSettings.scenes = scenes.ToArray();
-        Debug.Log("QuakeScope scene created at " + ScenePath + ". Open it and press Play to load current USGS data.");
+        Debug.Log("Salescope scene created at " + ScenePath + ". Open it and press Play to load the sales dashboard.");
     }
 }
 #endif

@@ -22,7 +22,7 @@ This is an Editor-ready prototype. It is not currently packaged as a standalone 
 ## Open and update the dashboard
 
 1. Open this repository folder in **Unity 6.6.7f1**.
-2. Open `Assets/Scenes/QuakeScopeDashboard.unity`.
+2. Open `Assets/Scenes/SalescopeDashboard.unity`.
 3. Press **Play** to load the current values from `LiveData/OlistSales.csv`.
 4. To add data, open `LiveData/OlistSales.csv` in Excel, append rows using the existing columns, and save as **CSV UTF-8**. While Play Mode is running, the dashboard refreshes after the save.
 
@@ -34,7 +34,7 @@ Order ID, Order Date, Ship Date, Customer ID, Region, Category, Sales, Quantity,
 
 Use ISO dates such as `2026-11-14`, decimal points for numeric sales, and a new Order ID for each new order. Reusing an Order ID adds its line-item revenue and units but does not increase the distinct-order KPI. Customer count is also distinct by Customer ID.
 
-The Edit Mode scene shows placeholders by design. Press Play to populate the saved chart hierarchy with values from the CSV. Use **Tools → QuakeScope → Build Editable 3D Dashboard** to regenerate the scene from the current CSV; rebuilding also replaces the existing scene objects.
+The Edit Mode scene shows placeholders by design. Press Play to populate the saved chart hierarchy with values from the CSV. Use **Tools → Salescope → Build Editable 3D Dashboard** to regenerate the scene from the current CSV; rebuilding also replaces the existing scene objects.
 
 ## Dataset and calculations
 
@@ -66,7 +66,7 @@ The dataset source is licensed **CC BY-NC-SA 4.0**. See [Datasets/OlistSource.md
 
 ## Repository layout
 
-- `Assets/Scenes/QuakeScopeDashboard.unity` — saved editable Unity scene.
+- `Assets/Scenes/SalescopeDashboard.unity` — saved editable Unity scene.
 - `Assets/ProjectPulseDashboard.cs` — C# data loading, KPI calculations, chart generation, live file polling, and interactions.
 - `LiveData/OlistSales.csv` — editable dataset used while the dashboard runs.
 - `Datasets/OlistRaw/` — compressed Olist source tables.
