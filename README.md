@@ -42,15 +42,22 @@ The dashboard uses the [Brazilian E-Commerce Public Dataset by Olist on Kaggle](
 
 The current data produces approximately:
 
-| KPI | Current value |
-| --- | ---: |
-| Customers | 96,096 |
-| Orders | 99,441 |
-| Item revenue | R$13.59M |
-| Average item revenue per order | R$137 |
-| Delivered orders | 96,478 |
-| Units sold | 112,650 |
-| Units per order | 1.13 |
+<div align="center">
+  <table>
+    <thead>
+      <tr><th align="center">KPI</th><th align="center">Current value</th></tr>
+    </thead>
+    <tbody>
+      <tr><td align="center">Customers</td><td align="center">96,096</td></tr>
+      <tr><td align="center">Orders</td><td align="center">99,441</td></tr>
+      <tr><td align="center">Item revenue</td><td align="center">R$13.59M</td></tr>
+      <tr><td align="center">Average item revenue per order</td><td align="center">R$137</td></tr>
+      <tr><td align="center">Delivered orders</td><td align="center">96,478</td></tr>
+      <tr><td align="center">Units sold</td><td align="center">112,650</td></tr>
+      <tr><td align="center">Units per order</td><td align="center">1.13</td></tr>
+    </tbody>
+  </table>
+</div>
 
 Revenue is the sum of item prices and excludes freight. The Olist tables do not contain profit, so the dashboard does not report profit. Monthly revenue is grouped chronologically and the chart displays the latest 12 months available in the CSV. Revenue axes are recalculated from the current values.
 
