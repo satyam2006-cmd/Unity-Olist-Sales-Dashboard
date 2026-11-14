@@ -2,7 +2,7 @@
 
 Salescope is an interactive 3D sales dashboard built in Unity. It turns the Olist Brazilian e-commerce dataset into live KPIs and 3D charts.
 
-![Salescope dashboard](Screenshots/salescope-dashboard.png)
+![Salescope dashboard](webpreview.png)
 
 The dashboard includes a monthly revenue line chart, category donut, product revenue bars, city columns, and a ranked green palette. KPI values, chart shapes, and axes update from the CSV while the scene is running.
 
