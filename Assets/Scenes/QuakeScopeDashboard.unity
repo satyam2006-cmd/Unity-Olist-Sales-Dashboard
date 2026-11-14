@@ -3357,7 +3357,7 @@ GameObject:
   - component: {fileID: 196780375}
   - component: {fileID: 196780374}
   m_Layer: 0
-  m_Name: "3D Text \xB7 R$13.59M"
+  m_Name: "KPI Value Placeholder \xB7 ITEM REVENUE"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3386,7 +3386,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 196780372}
-  m_Text: R$13.59M
+  m_Text: "\u2014"
   m_OffsetZ: 0
   m_CharacterSize: 0.01568
   m_LineSpacing: 1
@@ -3461,7 +3461,7 @@ GameObject:
   - component: {fileID: 221881171}
   - component: {fileID: 221881170}
   m_Layer: 0
-  m_Name: "3D Text \xB7 R$730K"
+  m_Name: "Chart Axis Placeholder \xB7 04 \xB7 Bar Chart \xB7 Revenue by Product"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3490,7 +3490,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 221881168}
-  m_Text: R$730K
+  m_Text: "\u2014"
   m_OffsetZ: 0
   m_CharacterSize: 0.0056
   m_LineSpacing: 1
@@ -6447,7 +6447,7 @@ GameObject:
   - component: {fileID: 397317755}
   - component: {fileID: 397317754}
   m_Layer: 0
-  m_Name: "3D Text \xB7 R$0"
+  m_Name: "Chart Axis Placeholder \xB7 05 \xB7 Column Chart \xB7 Revenue by City"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6476,7 +6476,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 397317752}
-  m_Text: R$0
+  m_Text: "\u2014"
   m_OffsetZ: 0
   m_CharacterSize: 0.0050399997
   m_LineSpacing: 1
@@ -6641,7 +6641,7 @@ GameObject:
   - component: {fileID: 415266476}
   - component: {fileID: 415266475}
   m_Layer: 0
-  m_Name: "3D Text \xB7 96,478"
+  m_Name: "KPI Value Placeholder \xB7 DELIVERED"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6670,7 +6670,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 415266473}
-  m_Text: 96,478
+  m_Text: "\u2014"
   m_OffsetZ: 0
   m_CharacterSize: 0.01568
   m_LineSpacing: 1
@@ -6835,7 +6835,7 @@ GameObject:
   - component: {fileID: 445406931}
   - component: {fileID: 445406930}
   m_Layer: 0
-  m_Name: "3D Text \xB7 R$137"
+  m_Name: "KPI Value Placeholder \xB7 AVG ORDER"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6864,7 +6864,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 445406928}
-  m_Text: R$137
+  m_Text: "\u2014"
   m_OffsetZ: 0
   m_CharacterSize: 0.01568
   m_LineSpacing: 1
@@ -7163,7 +7163,7 @@ GameObject:
   - component: {fileID: 453967942}
   - component: {fileID: 453967941}
   m_Layer: 0
-  m_Name: "3D Text \xB7 R$2.00M"
+  m_Name: "Chart Axis Placeholder \xB7 05 \xB7 Column Chart \xB7 Revenue by City"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7192,7 +7192,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 453967939}
-  m_Text: R$2.00M
+  m_Text: "\u2014"
   m_OffsetZ: 0
   m_CharacterSize: 0.0050399997
   m_LineSpacing: 1
@@ -10992,7 +10992,7 @@ GameObject:
   - component: {fileID: 702264003}
   - component: {fileID: 702264002}
   m_Layer: 0
-  m_Name: "3D Text \xB7 Bed Bath Table \xB7 11.1K"
+  m_Name: "Chart Value Placeholder \xB7 Units"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11021,7 +11021,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 702264000}
-  m_Text: "Bed Bath Table \xB7 11.1K"
+  m_Text: "Bed Bath Table \xB7 \u2014"
   m_OffsetZ: 0
   m_CharacterSize: 0.00616
   m_LineSpacing: 1
@@ -11096,7 +11096,7 @@ GameObject:
   - component: {fileID: 709928801}
   - component: {fileID: 709928800}
   m_Layer: 0
-  m_Name: "3D Text \xB7 R$988K"
+  m_Name: "Chart Axis Placeholder \xB7 04 \xB7 Bar Chart \xB7 Revenue by Product"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11125,7 +11125,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 709928798}
-  m_Text: R$988K
+  m_Text: "\u2014"
   m_OffsetZ: 0
   m_CharacterSize: 0.0056
   m_LineSpacing: 1
@@ -11526,7 +11526,7 @@ GameObject:
   - component: {fileID: 739746983}
   - component: {fileID: 739746982}
   m_Layer: 0
-  m_Name: "3D Text \xB7 R$1.26M"
+  m_Name: "Chart Axis Placeholder \xB7 04 \xB7 Bar Chart \xB7 Revenue by Product"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11555,7 +11555,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 739746980}
-  m_Text: R$1.26M
+  m_Text: "\u2014"
   m_OffsetZ: 0
   m_CharacterSize: 0.0056
   m_LineSpacing: 1
@@ -12306,7 +12306,7 @@ GameObject:
   - component: {fileID: 783089931}
   - component: {fileID: 783089930}
   m_Layer: 0
-  m_Name: "3D Text \xB7 Other categories \xB7 83.2K"
+  m_Name: "Chart Value Placeholder \xB7 Units"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12335,7 +12335,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 783089928}
-  m_Text: "Other categories \xB7 83.2K"
+  m_Text: "Other categories \xB7 \u2014"
   m_OffsetZ: 0
   m_CharacterSize: 0.00616
   m_LineSpacing: 1
@@ -12514,7 +12514,7 @@ GameObject:
   - component: {fileID: 791384609}
   - component: {fileID: 791384608}
   m_Layer: 0
-  m_Name: "3D Text \xB7 R$800K"
+  m_Name: "Chart Axis Placeholder \xB7 02 \xB7 Line Chart \xB7 Revenue per Month"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12543,7 +12543,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 791384606}
-  m_Text: R$800K
+  m_Text: "\u2014"
   m_OffsetZ: 0
   m_CharacterSize: 0.0057400004
   m_LineSpacing: 1
@@ -13376,7 +13376,7 @@ GameObject:
   - component: {fileID: 841687305}
   - component: {fileID: 841687304}
   m_Layer: 0
-  m_Name: "3D Text \xB7 1,12,650"
+  m_Name: "KPI Value Placeholder \xB7 ITEMS SOLD"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13405,7 +13405,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 841687302}
-  m_Text: 1,12,650
+  m_Text: "\u2014"
   m_OffsetZ: 0
   m_CharacterSize: 0.01568
   m_LineSpacing: 1
@@ -13592,7 +13592,7 @@ GameObject:
   - component: {fileID: 854965166}
   - component: {fileID: 854965165}
   m_Layer: 0
-  m_Name: "3D Text \xB7 R$1.60M"
+  m_Name: "Chart Axis Placeholder \xB7 02 \xB7 Line Chart \xB7 Revenue per Month"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13621,7 +13621,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 854965163}
-  m_Text: R$1.60M
+  m_Text: "\u2014"
   m_OffsetZ: 0
   m_CharacterSize: 0.0057400004
   m_LineSpacing: 1
@@ -14383,7 +14383,7 @@ GameObject:
   - component: {fileID: 889719039}
   - component: {fileID: 889719038}
   m_Layer: 0
-  m_Name: "3D Text \xB7 R$1.21M"
+  m_Name: "Chart Axis Placeholder \xB7 04 \xB7 Bar Chart \xB7 Revenue by Product"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14412,7 +14412,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 889719036}
-  m_Text: R$1.21M
+  m_Text: "\u2014"
   m_OffsetZ: 0
   m_CharacterSize: 0.0056
   m_LineSpacing: 1
@@ -15572,7 +15572,7 @@ GameObject:
   - component: {fileID: 1015218806}
   - component: {fileID: 1015218805}
   m_Layer: 0
-  m_Name: "3D Text \xB7 R$0"
+  m_Name: "Chart Axis Placeholder \xB7 02 \xB7 Line Chart \xB7 Revenue per Month"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15601,7 +15601,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1015218803}
-  m_Text: R$0
+  m_Text: "\u2014"
   m_OffsetZ: 0
   m_CharacterSize: 0.0057400004
   m_LineSpacing: 1
@@ -15766,7 +15766,7 @@ GameObject:
   - component: {fileID: 1028024771}
   - component: {fileID: 1028024770}
   m_Layer: 0
-  m_Name: "3D Text \xB7 R$1.00M"
+  m_Name: "Chart Axis Placeholder \xB7 05 \xB7 Column Chart \xB7 Revenue by City"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15795,7 +15795,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1028024768}
-  m_Text: R$1.00M
+  m_Text: "\u2014"
   m_OffsetZ: 0
   m_CharacterSize: 0.0050399997
   m_LineSpacing: 1
@@ -16196,7 +16196,7 @@ GameObject:
   - component: {fileID: 1041078123}
   - component: {fileID: 1041078122}
   m_Layer: 0
-  m_Name: "3D Text \xB7 Health Beauty \xB7 9.7K"
+  m_Name: "Chart Value Placeholder \xB7 Units"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -16225,7 +16225,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1041078120}
-  m_Text: "Health Beauty \xB7 9.7K"
+  m_Text: "Health Beauty \xB7 \u2014"
   m_OffsetZ: 0
   m_CharacterSize: 0.00616
   m_LineSpacing: 1
@@ -16834,7 +16834,7 @@ GameObject:
   - component: {fileID: 1087370753}
   - component: {fileID: 1087370752}
   m_Layer: 0
-  m_Name: "3D Text \xB7 1.13"
+  m_Name: "KPI Value Placeholder \xB7 ITEMS / ORDER"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -16863,7 +16863,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1087370750}
-  m_Text: 1.13
+  m_Text: "\u2014"
   m_OffsetZ: 0
   m_CharacterSize: 0.01568
   m_LineSpacing: 1
@@ -19387,7 +19387,7 @@ GameObject:
   - component: {fileID: 1216959914}
   - component: {fileID: 1216959913}
   m_Layer: 0
-  m_Name: "3D Text \xB7 99,441"
+  m_Name: "KPI Value Placeholder \xB7 ORDERS"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -19416,7 +19416,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1216959911}
-  m_Text: 99,441
+  m_Text: "\u2014"
   m_OffsetZ: 0
   m_CharacterSize: 0.01568
   m_LineSpacing: 1
@@ -22501,7 +22501,7 @@ GameObject:
   - component: {fileID: 1414028261}
   - component: {fileID: 1414028260}
   m_Layer: 0
-  m_Name: "3D Text \xB7 R$912K"
+  m_Name: "Chart Axis Placeholder \xB7 04 \xB7 Bar Chart \xB7 Revenue by Product"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -22530,7 +22530,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1414028258}
-  m_Text: R$912K
+  m_Text: "\u2014"
   m_OffsetZ: 0
   m_CharacterSize: 0.0056
   m_LineSpacing: 1
@@ -24737,7 +24737,7 @@ GameObject:
   - component: {fileID: 1509914428}
   - component: {fileID: 1509914427}
   m_Layer: 0
-  m_Name: "3D Text \xB7 Sports Leisure \xB7 8.6K"
+  m_Name: "Chart Value Placeholder \xB7 Units"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -24766,7 +24766,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1509914425}
-  m_Text: "Sports Leisure \xB7 8.6K"
+  m_Text: "Sports Leisure \xB7 \u2014"
   m_OffsetZ: 0
   m_CharacterSize: 0.00616
   m_LineSpacing: 1
@@ -25293,7 +25293,7 @@ GameObject:
   - component: {fileID: 1538285492}
   - component: {fileID: 1538285491}
   m_Layer: 0
-  m_Name: "3D Text \xB7 R$1.04M"
+  m_Name: "Chart Axis Placeholder \xB7 04 \xB7 Bar Chart \xB7 Revenue by Product"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -25322,7 +25322,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1538285489}
-  m_Text: R$1.04M
+  m_Text: "\u2014"
   m_OffsetZ: 0
   m_CharacterSize: 0.0056
   m_LineSpacing: 1
@@ -25811,7 +25811,7 @@ GameObject:
   - component: {fileID: 1561872246}
   - component: {fileID: 1561872245}
   m_Layer: 0
-  m_Name: "3D Text \xB7 112.7K"
+  m_Name: "Chart Value Placeholder \xB7 Units"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -25840,7 +25840,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1561872243}
-  m_Text: 112.7K
+  m_Text: "\u2014"
   m_OffsetZ: 0
   m_CharacterSize: 0.0119
   m_LineSpacing: 1
@@ -27918,7 +27918,7 @@ GameObject:
   - component: {fileID: 1730424130}
   - component: {fileID: 1730424129}
   m_Layer: 0
-  m_Name: "3D Text \xB7 96,096"
+  m_Name: "KPI Value Placeholder \xB7 CUSTOMERS"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -27947,7 +27947,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1730424127}
-  m_Text: 96,096
+  m_Text: "\u2014"
   m_OffsetZ: 0
   m_CharacterSize: 0.01568
   m_LineSpacing: 1
@@ -28360,7 +28360,7 @@ GameObject:
   - component: {fileID: 1757847418}
   - component: {fileID: 1757847417}
   m_Layer: 0
-  m_Name: "3D Text \xB7 R$635K"
+  m_Name: "Chart Axis Placeholder \xB7 04 \xB7 Bar Chart \xB7 Revenue by Product"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -28389,7 +28389,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1757847415}
-  m_Text: R$635K
+  m_Text: "\u2014"
   m_OffsetZ: 0
   m_CharacterSize: 0.0056
   m_LineSpacing: 1
@@ -31626,7 +31626,7 @@ GameObject:
   - component: {fileID: 1953720201}
   - component: {fileID: 1953720200}
   m_Layer: 0
-  m_Name: "3D Text \xB7 R$632K"
+  m_Name: "Chart Axis Placeholder \xB7 04 \xB7 Bar Chart \xB7 Revenue by Product"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -31655,7 +31655,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1953720198}
-  m_Text: R$632K
+  m_Text: "\u2014"
   m_OffsetZ: 0
   m_CharacterSize: 0.0056
   m_LineSpacing: 1

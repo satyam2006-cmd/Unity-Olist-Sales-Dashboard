@@ -26,6 +26,12 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
     TextMesh insightText;
     readonly Dictionary<Collider, string> clickDetails = new Dictionary<Collider, string>();
     SalesSnapshot sales;
+    string liveDataPath;
+    string lastLoadedDataStamp;
+    int lastLoadedContentHash;
+    float nextDataPollTime;
+    string lastDataLoadError;
+    const float DataPollIntervalSeconds = 1.5f;
 
     static Color Hex(string html) { ColorUtility.TryParseHtmlString(html, out var c); return c; }
 
@@ -35,21 +41,44 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
         ClearChildren();
         BuildEnvironment();
         BuildDashboard();
+        SetDataPlaceholdersInEditor();
+    }
+
+    public void SetDataPlaceholdersInEditor()
+    {
+        if (Application.isPlaying) return;
+        board = transform.Find("Retail Sales · 3D Dashboard");
+        FindInsightText();
+        SetDataPlaceholders();
     }
 
     void Start()
     {
         viewCamera = GetComponentInChildren<Camera>(true);
+        liveDataPath = GetLiveDataPath();
+        string csv = ReadLiveData();
+        sales = ParseSalesSnapshot(csv);
+        lastLoadedContentHash = csv.GetHashCode();
+        lastLoadedDataStamp = GetLiveDataStamp();
         board = transform.Find("Retail Sales · 3D Dashboard");
         if (board == null)
         {
             BuildEnvironment();
             BuildDashboard();
         }
+        else
+        {
+            TextAsset baseline = Resources.Load<TextAsset>("OlistSales");
+            if ((baseline != null && !string.Equals(csv, baseline.text, StringComparison.Ordinal)) || HasDataPlaceholders())
+                RebuildDataGroups();
+        }
+        FindInsightText();
+        SetLiveStatus("LIVE CSV · " + sales.RowCount.ToString("N0", CultureInfo.InvariantCulture) + " ROWS · APPEND ROWS IN EXCEL");
     }
 
     void Update()
     {
+        PollLiveData();
         if (Mouse.current == null || viewCamera == null || !Mouse.current.leftButton.wasPressedThisFrame) return;
         var ray = viewCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
         if (Physics.Raycast(ray, out var hit, 100f) && clickDetails.TryGetValue(hit.collider, out var detail) && insightText != null)
@@ -118,6 +147,174 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
         BuildProgressPanel();
         BuildInsightsPanel();
         OrganizeSceneHierarchy();
+    }
+
+    void RebuildDataGroups()
+    {
+        if (board == null || sales == null) return;
+        clickDetails.Clear();
+        RebuildGroup("01 · KPI Cards", BuildSalesMetrics);
+        RebuildGroup("02 · Line Chart · Revenue per Month", BuildWeeklyChart);
+        RebuildGroup("03 · Donut Chart · Units by Category", BuildReminders);
+        RebuildGroup("04 · Bar Chart · Revenue by Product", BuildProjectList);
+        RebuildGroup("05 · Column Chart · Revenue by City", BuildTeamPanel);
+        FindInsightText();
+    }
+
+    void RebuildGroup(string groupName, Action build)
+    {
+        var group = board.Find(groupName);
+        if (group == null)
+        {
+            var groupObject = new GameObject(groupName);
+            group = groupObject.transform;
+            group.SetParent(board, false);
+        }
+        for (int i = group.childCount - 1; i >= 0; i--)
+        {
+            var child = group.GetChild(i).gameObject;
+            foreach (Renderer renderer in child.GetComponentsInChildren<Renderer>(true))
+                if (renderer.sharedMaterial != null)
+                {
+                    if (Application.isPlaying) Destroy(renderer.sharedMaterial);
+                    else DestroyImmediate(renderer.sharedMaterial);
+                }
+            foreach (MeshFilter filter in child.GetComponentsInChildren<MeshFilter>(true))
+                if (filter.sharedMesh != null)
+                {
+                    if (Application.isPlaying) Destroy(filter.sharedMesh);
+                    else DestroyImmediate(filter.sharedMesh);
+                }
+            if (Application.isPlaying) Destroy(child);
+            else DestroyImmediate(child);
+        }
+        Transform previousBoard = board;
+        board = group;
+        try { build(); }
+        finally { board = previousBoard; }
+    }
+
+    void FindInsightText()
+    {
+        if (board == null) return;
+        var group = board.Find("06 · Dashboard Frame & Insights");
+        if (group == null) return;
+        insightText = group.GetComponentsInChildren<TextMesh>(true).FirstOrDefault(text => text.name.Contains("LIVE DATA STATUS"));
+    }
+
+    bool HasDataPlaceholders()
+    {
+        if (board == null) return false;
+        return board.GetComponentsInChildren<TextMesh>(true).Any(text => text.text == "—");
+    }
+
+    void SetDataPlaceholders()
+    {
+        if (board == null) return;
+        var kpiGroup = board.Find("01 · KPI Cards");
+        if (kpiGroup != null)
+        {
+            string[] labels = { "CUSTOMERS", "ORDERS", "ITEM REVENUE", "AVG ORDER", "DELIVERED", "ITEMS SOLD", "ITEMS / ORDER" };
+            var values = kpiGroup.GetComponentsInChildren<TextMesh>(true)
+                .Where(text => text.text.Any(char.IsDigit) && text.transform.position.y > 1.45f)
+                .OrderBy(text => text.transform.position.x).ToArray();
+            for (int i = 0; i < values.Length; i++)
+            {
+                values[i].text = "—";
+                values[i].name = "KPI Value Placeholder · " + labels[Mathf.Min(i, labels.Length - 1)];
+            }
+        }
+
+        string[] chartGroups = {
+            "02 · Line Chart · Revenue per Month",
+            "03 · Donut Chart · Units by Category",
+            "04 · Bar Chart · Revenue by Product",
+            "05 · Column Chart · Revenue by City"
+        };
+        foreach (string groupName in chartGroups)
+        {
+            var group = board.Find(groupName);
+            if (group == null) continue;
+            foreach (TextMesh text in group.GetComponentsInChildren<TextMesh>(true))
+            {
+                if (text.text.StartsWith("R$", StringComparison.Ordinal))
+                {
+                    text.text = "—";
+                    text.name = "Chart Axis Placeholder · " + groupName;
+                }
+                else if (groupName.Contains("Donut") && text.text.Any(char.IsDigit))
+                {
+                    int separator = text.text.LastIndexOf('·');
+                    text.text = separator >= 0 ? text.text.Substring(0, separator + 1) + " —" : "—";
+                    text.name = "Chart Value Placeholder · Units";
+                }
+            }
+        }
+    }
+
+    void SetLiveStatus(string value)
+    {
+        if (insightText != null) insightText.text = value;
+    }
+
+    string GetLiveDataPath()
+    {
+        string projectRoot = System.IO.Directory.GetParent(Application.dataPath).FullName;
+        return System.IO.Path.Combine(projectRoot, "LiveData", "OlistSales.csv");
+    }
+
+    void EnsureLiveDataFile()
+    {
+        liveDataPath = GetLiveDataPath();
+        if (System.IO.File.Exists(liveDataPath)) return;
+        var seed = Resources.Load<TextAsset>("OlistSales");
+        if (seed == null) throw new InvalidOperationException("Missing Olist sales CSV. Restore Assets/Resources/OlistSales.csv.");
+        System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(liveDataPath));
+        System.IO.File.WriteAllText(liveDataPath, seed.text, new System.Text.UTF8Encoding(false));
+    }
+
+    string ReadLiveData()
+    {
+        EnsureLiveDataFile();
+        return System.IO.File.ReadAllText(liveDataPath, System.Text.Encoding.UTF8);
+    }
+
+    string GetLiveDataStamp()
+    {
+        var info = new System.IO.FileInfo(liveDataPath);
+        return info.Exists ? info.Length + ":" + info.LastWriteTimeUtc.Ticks : string.Empty;
+    }
+
+    void PollLiveData()
+    {
+        if (!Application.isPlaying || string.IsNullOrEmpty(liveDataPath) || Time.unscaledTime < nextDataPollTime) return;
+        nextDataPollTime = Time.unscaledTime + DataPollIntervalSeconds;
+        string stamp = GetLiveDataStamp();
+        if (stamp == lastLoadedDataStamp) return;
+        try
+        {
+            string csv = System.IO.File.ReadAllText(liveDataPath, System.Text.Encoding.UTF8);
+            int contentHash = csv.GetHashCode();
+            if (contentHash == lastLoadedContentHash)
+            {
+                lastLoadedDataStamp = stamp;
+                return;
+            }
+            sales = ParseSalesSnapshot(csv);
+            lastLoadedContentHash = contentHash;
+            lastLoadedDataStamp = stamp;
+            lastDataLoadError = null;
+            RebuildDataGroups();
+            SetLiveStatus("LIVE CSV UPDATED · " + sales.RowCount.ToString("N0", CultureInfo.InvariantCulture) + " ROWS · " + DateTime.Now.ToString("HH:mm:ss", CultureInfo.InvariantCulture));
+            Debug.Log("Salescope recalculated from " + liveDataPath + " (" + sales.RowCount.ToString("N0", CultureInfo.InvariantCulture) + " order lines).");
+        }
+        catch (Exception exception)
+        {
+            string message = "Live sales CSV is not ready yet: " + exception.Message;
+            if (message != lastDataLoadError) Debug.LogWarning(message);
+            lastDataLoadError = message;
+            SetLiveStatus("LIVE CSV INVALID · CHECK HEADERS / SAVE AGAIN");
+        }
     }
 
     void OrganizeSceneHierarchy()
@@ -195,10 +392,9 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
             sales.CustomerCount.ToString("N0") + " unique customers in this dataset.",
             sales.OrderCount.ToString("N0") + " distinct order IDs.",
             "Revenue total: " + Money(sales.TotalSales) + ".",
-            "Item revenue: " + Money(sales.TotalSales) + "; freight is excluded.",
             "Average item revenue per order: " + Money(sales.OrderCount == 0 ? 0 : sales.TotalSales / sales.OrderCount) + ".",
             sales.DeliveredOrders.ToString("N0") + " orders have delivered status in the source dataset.",
-            sales.TotalUnits.ToString("N0") + " order-item rows; each row is one item.",
+            sales.TotalUnits.ToString("N0") + " order items in the current CSV.",
             sales.AverageUnitsPerOrder.ToString("0.00") + " order items per order on average."
         };
         for (int i = 0; i < labels.Length; i++)
@@ -226,8 +422,12 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
     void BuildWeeklyChart()
     {
         Panel("Chart · Revenue per Month · 3D", new Vector3(-1.34f, .05f, .12f), 5.90f, 1.91f, .12f, White, .10f);
-        Text("REVENUE PER MONTH", new Vector3(-1.34f, .79f, .225f), .075f, Ink, TextAnchor.MiddleCenter, FontStyle.Bold);
-        float x0 = -4.02f, x1 = 1.32f, baseY = -.57f, topY = .55f, max = Mathf.Ceil((float)sales.MaxMonthlySales / 100000f) * 100000f;
+        Text("MONTHLY REVENUE · LAST 12 MONTHS", new Vector3(-1.34f, .79f, .225f), .075f, Ink, TextAnchor.MiddleCenter, FontStyle.Bold);
+        var allMonths = sales.MonthlySales.OrderBy(pair => pair.Key).ToArray();
+        var months = allMonths.Skip(Math.Max(0, allMonths.Length - 12)).ToArray();
+        if (months.Length == 0)
+            months = new[] { new KeyValuePair<DateTime, double>(new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1), 0) };
+        float x0 = -4.02f, x1 = 1.32f, baseY = -.57f, topY = .55f, max = NiceAxisMaximum((float)months.Select(pair => pair.Value).DefaultIfEmpty(0).Max());
         for (int tick = 0; tick <= 2; tick++)
         {
             float y = Mathf.Lerp(baseY, topY, tick / 2f);
@@ -237,21 +437,22 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
         }
         Box("Revenue Axis · X", new Vector3((x0 + x1) * .5f, baseY, .245f), x1 - x0, .022f, .045f, Muted, false);
         Box("Revenue Axis · Y", new Vector3(x0, (baseY + topY) * .5f, .245f), .022f, topY - baseY, .045f, Muted, false);
-        string[] months = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
         var points = new List<Vector3>();
-        float step = (x1 - x0) / 11f;
-        for (int i = 0; i < 12; i++)
+        float step = months.Length <= 1 ? 0f : (x1 - x0) / (months.Length - 1f);
+        for (int i = 0; i < months.Length; i++)
         {
             float x = x0 + i * step;
-            float y = baseY + (topY - baseY) * (float)(sales.MonthlySales[i] / max);
+            float y = baseY + (topY - baseY) * (float)(months[i].Value / max);
             points.Add(new Vector3(x, y, .29f));
-            Text(months[i], new Vector3(x, baseY - .16f, .26f), .046f, Muted, TextAnchor.MiddleCenter);
+            Text(months[i].Key.ToString("MMM yy", CultureInfo.InvariantCulture), new Vector3(x, baseY - .16f, .26f), .041f, Muted, TextAnchor.MiddleCenter);
         }
+        if (points.Count == 1) points.Add(new Vector3(x1, points[0].y, points[0].z));
         List<Vector3> smooth = SmoothPoints(points, 3);
         AreaMesh("Monthly Revenue Area · 3D Mesh", smooth, baseY, .255f, Hex("#D7EEDF"));
         for (int i = 0; i < smooth.Count - 1; i++) Segment("Monthly Revenue Curve · 3D", smooth[i], smooth[i + 1], .026f, Green);
-        for (int i = 0; i < points.Count; i++) SphereClickable("Monthly Revenue Mark · " + months[i], points[i], .042f, Bright,
-            months[i] + " item revenue: " + Money(sales.MonthlySales[i]) + " across 2016–2018.");
+        for (int i = 0; i < months.Length; i++) SphereClickable("Monthly Revenue Mark · " + months[i].Key.ToString("yyyy-MM", CultureInfo.InvariantCulture),
+            new Vector3(x0 + i * step, baseY + (topY - baseY) * (float)(months[i].Value / max), .29f), .042f, Bright,
+            months[i].Key.ToString("MMMM yyyy", CultureInfo.InvariantCulture) + " item revenue: " + Money(months[i].Value) + ".");
         ChartFrame(-1.34f, .05f, 5.90f, 1.91f);
     }
 
@@ -290,7 +491,8 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
         Text("TOTAL REVENUE", new Vector3(-4.23f, -1.08f, .225f), .071f, Ink, TextAnchor.MiddleLeft, FontStyle.Bold);
         Text("by product category", new Vector3(-4.23f, -1.20f, .225f), .046f, Muted, TextAnchor.MiddleLeft);
         var products = sales.SubcategorySales.OrderByDescending(x => x.Value).Take(8).ToArray();
-        float max = (float)products[0].Value;
+        float max = (float)products.Select(product => product.Value).DefaultIfEmpty(1).Max();
+        if (max <= 0) max = 1;
         Color[] palette = { Green, Hex("#277C5A"), Amber, Bright, Hex("#3D956D"), Hex("#91CDAA"), Blue, Hex("#527F65"), Hex("#D9B800") };
         for (int i = 0; i < products.Length; i++)
         {
@@ -311,8 +513,7 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
         Text("by city · top 7", new Vector3(1.20f, -1.20f, .225f), .046f, Muted, TextAnchor.MiddleLeft);
         var cities = sales.CitySales.OrderByDescending(x => x.Value).Take(7).ToArray();
         float x0 = 1.38f, x1 = 4.28f, baseY = -2.15f, topY = -1.38f;
-        float max = Mathf.Ceil((float)cities[0].Value / 100000f) * 100000f;
-        if (max <= 0) max = 100000f;
+        float max = NiceAxisMaximum((float)cities.Select(city => city.Value).DefaultIfEmpty(0).Max());
         for (int tick = 0; tick <= 2; tick++)
         {
             float y = Mathf.Lerp(baseY, topY, tick / 2f);
@@ -322,7 +523,7 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
         }
         Box("City Revenue X Axis", new Vector3((x0 + x1) * .5f, baseY, .25f), x1 - x0, .022f, .045f, Muted, false);
         Box("City Revenue Y Axis", new Vector3(x0, (baseY + topY) * .5f, .25f), .022f, topY - baseY, .045f, Muted, false);
-        float step = (x1 - x0) / cities.Length;
+        float step = cities.Length <= 1 ? x1 - x0 : (x1 - x0) / cities.Length;
         for (int i = 0; i < cities.Length; i++)
         {
             float x = x0 + step * (i + .5f);
@@ -342,15 +543,15 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
 
     void BuildInsightsPanel()
     {
-        insightText = Text("CLICK A KPI OR CHART MARK TO INSPECT THE VALUE", new Vector3(0, -2.49f, .18f), .038f, Muted, TextAnchor.MiddleCenter);
+        insightText = Text("LIVE DATA STATUS · EDIT LiveData/OlistSales.csv THEN PLAY", new Vector3(0, -2.49f, .18f), .038f, Muted, TextAnchor.MiddleCenter);
     }
 
     sealed class SalesSnapshot
     {
         public double TotalSales, TotalProfit;
-        public int OrderCount, DeliveredOrders, CustomerCount, TotalUnits, PeakMonthIndex;
+        public int OrderCount, DeliveredOrders, CustomerCount, TotalUnits, RowCount;
         public float AverageUnitsPerOrder;
-        public readonly double[] MonthlySales = new double[12];
+        public readonly SortedDictionary<DateTime, double> MonthlySales = new SortedDictionary<DateTime, double>();
         public double MaxMonthlySales;
         public readonly Dictionary<string, double> CategorySales = new Dictionary<string, double>();
         public readonly Dictionary<string, double> CategoryProfit = new Dictionary<string, double>();
@@ -362,11 +563,15 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
 
     SalesSnapshot LoadSalesSnapshot()
     {
+        return ParseSalesSnapshot(ReadLiveData());
+    }
+
+    SalesSnapshot ParseSalesSnapshot(string csvText)
+    {
+        if (string.IsNullOrWhiteSpace(csvText)) throw new InvalidOperationException("The sales CSV is empty.");
         var result = new SalesSnapshot();
-        TextAsset csv = Resources.Load<TextAsset>("OlistSales");
-        if (csv == null) { Debug.LogError("Missing Resources/OlistSales.csv Olist dataset."); return result; }
-        string[] lines = csv.text.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-        if (lines.Length < 2) return result;
+        string[] lines = csvText.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+        if (lines.Length < 2) throw new InvalidOperationException("The sales CSV needs a header and at least one data row.");
         var headers = CsvLine(lines[0]);
         int orderCol = headers.IndexOf("Order ID"), dateCol = headers.IndexOf("Order Date");
         int regionCol = headers.IndexOf("Region"), categoryCol = headers.IndexOf("Category");
@@ -374,14 +579,18 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
         int customerCol = headers.IndexOf("Customer ID"), unitsCol = headers.IndexOf("Quantity");
         int shipCol = headers.IndexOf("Ship Date"), cityCol = headers.IndexOf("City"), subcategoryCol = headers.IndexOf("Sub-Category");
         int statusCol = headers.IndexOf("Order Status");
+        int[] requiredColumns = { orderCol, dateCol, regionCol, categoryCol, salesCol, customerCol, unitsCol, shipCol, cityCol, subcategoryCol, statusCol };
+        if (requiredColumns.Any(column => column < 0))
+            throw new InvalidOperationException("Required columns: Order ID, Order Date, Ship Date, Customer ID, Region, Category, Sales, Quantity, City, Sub-Category, Order Status.");
+        int lastRequiredColumn = requiredColumns.Max();
         var orders = new HashSet<string>(); var delivered = new HashSet<string>(); var customers = new HashSet<string>();
         CultureInfo dateCulture = CultureInfo.InvariantCulture;
         for (int row = 1; row < lines.Length; row++)
         {
             List<string> fields = CsvLine(lines[row]);
-            int required = new[] { orderCol, dateCol, regionCol, categoryCol, salesCol, customerCol, unitsCol, shipCol, cityCol, subcategoryCol, statusCol }.Max();
-            if (fields.Count <= required) continue;
+            if (fields.Count <= lastRequiredColumn) continue;
             if (!double.TryParse(fields[salesCol], NumberStyles.Float, CultureInfo.InvariantCulture, out double amount)) continue;
+            result.RowCount++;
             result.TotalSales += amount; orders.Add(fields[orderCol]); customers.Add(fields[customerCol]);
             if (fields[statusCol] == "delivered") delivered.Add(fields[orderCol]);
             int quantity = 0; int.TryParse(fields[unitsCol], NumberStyles.Integer, CultureInfo.InvariantCulture, out quantity); result.TotalUnits += quantity;
@@ -397,14 +606,27 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
             if (!result.CitySales.ContainsKey(city)) result.CitySales[city] = 0;
             result.CitySales[city] += amount;
             if (DateTime.TryParse(fields[dateCol], dateCulture, DateTimeStyles.None, out DateTime date))
-                result.MonthlySales[date.Month - 1] += amount;
+            {
+                DateTime month = new DateTime(date.Year, date.Month, 1);
+                if (!result.MonthlySales.ContainsKey(month)) result.MonthlySales[month] = 0;
+                result.MonthlySales[month] += amount;
+            }
         }
+        if (result.RowCount == 0) throw new InvalidOperationException("No valid sales rows were found in the CSV.");
         result.OrderCount = orders.Count; result.DeliveredOrders = delivered.Count; result.CustomerCount = customers.Count;
         result.AverageUnitsPerOrder = result.OrderCount == 0 ? 0 : (float)result.TotalUnits / result.OrderCount;
-        for (int i = 0; i < result.MonthlySales.Length; i++)
-            if (result.MonthlySales[i] > result.MaxMonthlySales)
-            { result.MaxMonthlySales = result.MonthlySales[i]; result.PeakMonthIndex = i; }
+        result.MaxMonthlySales = result.MonthlySales.Values.DefaultIfEmpty(0).Max();
         return result;
+    }
+
+    static float NiceAxisMaximum(float value)
+    {
+        if (value <= 0 || float.IsNaN(value) || float.IsInfinity(value)) return 1f;
+        float roughStep = value / 2f;
+        float magnitude = Mathf.Pow(10f, Mathf.Floor(Mathf.Log10(roughStep)));
+        float fraction = roughStep / magnitude;
+        float niceFraction = fraction <= 1f ? 1f : fraction <= 2f ? 2f : fraction <= 5f ? 5f : 10f;
+        return niceFraction * magnitude * 2f;
     }
 
     static List<string> CsvLine(string line)
@@ -418,10 +640,10 @@ public sealed class ProjectPulseDashboard : MonoBehaviour
                 if (quoted && i + 1 < line.Length && line[i + 1] == '"') { field.Append('"'); i++; }
                 else quoted = !quoted;
             }
-            else if (c == ',' && !quoted) { fields.Add(field.ToString().Trim()); field.Length = 0; }
+            else if (c == ',' && !quoted) { fields.Add(field.ToString().Trim().TrimStart('\uFEFF')); field.Length = 0; }
             else field.Append(c);
         }
-        fields.Add(field.ToString().Trim()); return fields;
+        fields.Add(field.ToString().Trim().TrimStart('\uFEFF')); return fields;
     }
 
     static string Money(double value)

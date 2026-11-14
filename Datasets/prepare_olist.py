@@ -5,7 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 RAW = ROOT / "OlistRaw"
-OUTPUT = Path(__file__).resolve().parents[1] / "Assets" / "Resources" / "OlistSales.csv"
+OUTPUT = Path(__file__).resolve().parents[1] / "LiveData" / "OlistSales.csv"
 
 
 def read_gzip(name):
