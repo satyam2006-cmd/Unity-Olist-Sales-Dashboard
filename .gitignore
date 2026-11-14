@@ -26,6 +26,7 @@ Datasets/SuperstoreSample.csv.meta
 # Keep only the current review image
 Screenshots/*
 !Screenshots/olist-sales-dashboard.png
+!Screenshots/salescope-dashboard.png
 
 # Build outputs
 *.apk

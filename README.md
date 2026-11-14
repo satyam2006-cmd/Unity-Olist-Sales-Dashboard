@@ -1,42 +1,74 @@
-# Unity Olist Sales Dashboard
+# Salescope — 3D Olist Sales Dashboard
 
-An editable 3D sales dashboard built with Unity 6.6. It uses extruded 3D scene geometry for its KPI marks, chart bars, axes, donut segments, labels, and chart panels. The scene is saved in Edit Mode so the objects are available in the Hierarchy.
+Salescope is an interactive 3D sales dashboard built in Unity. Its KPI values and chart geometry are calculated in C# from an editable CSV file. The scene is saved in Edit Mode with a clear hierarchy so the 3D objects are available for inspection and adjustment.
 
-## Open the project
+![Salescope green 3D sales dashboard](Screenshots/salescope-dashboard.png)
 
-1. Open this folder in Unity 6.6.7f1.
+## Project readiness
+
+**Ready for review and continued development in the Unity Editor.** The saved scene, live CSV refresh, data-driven charts, KPI calculations, click inspection, and green value palette are implemented. A temporary appended row was used to verify that KPI totals, bar widths, city column heights, and axis ranges respond to changed data; the original dataset was restored afterward.
+
+This is an Editor-ready prototype. It is not currently packaged as a standalone desktop build or connected to a commerce database or live sales API. New data comes from edits to the local CSV described below.
+
+## What is in the dashboard
+
+- **KPI values:** unique customers, distinct orders, item revenue, average item revenue per order, delivered orders, units sold, and units per order.
+- **Charts:** monthly revenue line and area chart, units by category donut, revenue by product horizontal bars, and revenue by city columns.
+- **Live recalculation:** Unity C# reads the CSV and checks for saved file changes every 1.5 seconds while the scene is in Play Mode. It recalculates the KPI values and rebuilds the chart geometry and numeric axes from the new data.
+- **Value styling:** charts share a green palette. Higher values use darker shades; lower values fade to pale green.
+- **Interaction:** click KPI and chart marks in Play Mode to show the selected value in the dashboard status area.
+- **Editable scene:** the root is `Salescope`; chart objects are grouped under `Retail Sales · 3D Dashboard` into KPI, line, donut, bar, column, and frame groups. Edit Mode shows placeholders for data-driven numbers and axes.
+
+## Open and update the dashboard
+
+1. Open this repository folder in **Unity 6.6.7f1**.
 2. Open `Assets/Scenes/QuakeScopeDashboard.unity`.
-3. Open `LiveData/OlistSales.csv` in Excel, append rows using the existing columns, and save it as CSV UTF-8.
-4. Press Play. Unity reads the CSV directly in C#, recalculates the dashboard, and checks for saved changes every 1.5 seconds.
+3. Press **Play** to load the current values from `LiveData/OlistSales.csv`.
+4. To add data, open `LiveData/OlistSales.csv` in Excel, append rows using the existing columns, and save as **CSV UTF-8**. While Play Mode is running, the dashboard refreshes after the save.
 
-To rebuild the saved scene from the prepared dataset, use **Tools → QuakeScope → Build Editable 3D Dashboard**. The Edit Mode values and numeric axis labels are placeholders; Play Mode populates them from the CSV.
+The expected columns are:
 
-## Dashboard contents
+```text
+Order ID, Order Date, Ship Date, Customer ID, Region, Category, Sales, Quantity, City, Sub-Category, Order Status
+```
 
-- KPI row: unique customers, orders, item revenue, average order revenue, delivered orders, items sold, and items per order.
-- Revenue by month, units by category, revenue by product category, and revenue by city.
-- Clickable KPIs and chart bars show the selected value in the scene.
-- KPI values, monthly line points, category donut segments, product bars, city columns, and numeric axis scales are recalculated from the live CSV.
-- Chart colors use a ranked green palette: higher values use darker greens and lower values fade to lighter greens.
+Use ISO dates such as `2026-11-14`, decimal points for numeric sales, and a new Order ID for each new order. Reusing an Order ID adds its line-item revenue and units but does not increase the distinct-order KPI. Customer count is also distinct by Customer ID.
 
-Revenue is based on item prices and excludes freight. The Olist tables do not contain profit, so the dashboard does not report profit.
+The Edit Mode scene shows placeholders by design. Press Play to populate the saved chart hierarchy with values from the CSV. Use **Tools → QuakeScope → Build Editable 3D Dashboard** to regenerate the scene from the current CSV; rebuilding also replaces the existing scene objects.
 
-## Data
+## Dataset and calculations
 
-This project uses the [Brazilian E-Commerce Public Dataset by Olist on Kaggle](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce). The downloaded compressed source tables are in `Datasets/OlistRaw/`. `LiveData/OlistSales.csv` is the Excel-editable order-line file read by Unity.
+The dashboard uses the [Brazilian E-Commerce Public Dataset by Olist on Kaggle](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce), covering Brazilian marketplace orders from 2016–2018. The source tables are included under `Datasets/OlistRaw/`, and the Excel-editable joined order-line file is `LiveData/OlistSales.csv`.
 
-Append rows with the same columns as the header: `Order ID`, `Order Date`, `Ship Date`, `Customer ID`, `Region`, `Category`, `Sales`, `Quantity`, `City`, `Sub-Category`, and `Order Status`. Keep dates parseable (ISO dates are recommended), and enter `Sales` as a number using a decimal point. Save the file; Unity notices the changed file and recalculates the KPI values and chart axes in C#.
+The current data produces approximately:
 
-To rebuild the joined CSV, run:
+| KPI | Current value |
+| --- | ---: |
+| Customers | 96,096 |
+| Orders | 99,441 |
+| Item revenue | R$13.59M |
+| Average item revenue per order | R$137 |
+| Delivered orders | 96,478 |
+| Units sold | 112,650 |
+| Units per order | 1.13 |
+
+Revenue is the sum of item prices and excludes freight. The Olist tables do not contain profit, so the dashboard does not report profit. Monthly revenue is grouped chronologically and the chart displays the latest 12 months available in the CSV. Revenue axes are recalculated from the current values.
+
+To regenerate the joined CSV from the original compressed source tables, run:
 
 ```powershell
 python Datasets/prepare_olist.py
 ```
 
-This rebuilds `LiveData/OlistSales.csv` from the compressed Olist source tables.
+**This overwrites `LiveData/OlistSales.csv`.** Keep a backup first if you want to retain Excel edits or appended rows.
 
-The source dataset is licensed CC BY-NC-SA 4.0. See [Datasets/OlistSource.md](Datasets/OlistSource.md) for attribution and transformation notes.
+The dataset source is licensed **CC BY-NC-SA 4.0**. See [Datasets/OlistSource.md](Datasets/OlistSource.md) for attribution and transformation details.
 
-## Preview
+## Repository layout
 
-![Olist sales dashboard](Screenshots/olist-sales-dashboard.png)
+- `Assets/Scenes/QuakeScopeDashboard.unity` — saved editable Unity scene.
+- `Assets/ProjectPulseDashboard.cs` — C# data loading, KPI calculations, chart generation, live file polling, and interactions.
+- `LiveData/OlistSales.csv` — editable dataset used while the dashboard runs.
+- `Datasets/OlistRaw/` — compressed Olist source tables.
+- `Datasets/prepare_olist.py` — script to rebuild the joined CSV.
+- `Screenshots/salescope-dashboard.png` — current dashboard preview.
